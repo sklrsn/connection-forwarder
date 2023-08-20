@@ -7,7 +7,7 @@ services:
       - ./storage:/opt/storage
   # connection-exporter:
   #   build: connection-exporter
-  remote-target:
+  xrdp:
     image: frxyt/xrdp:xfce
     environment:
       - FRX_XRDP_USER_NAME=john.doe

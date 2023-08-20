@@ -25,7 +25,7 @@ func main() {
 		if err != nil {
 			log.Printf("error occurred %v", err)
 		}
-		targetConn, err := net.Dial("tcp", "remote-target:3389")
+		targetConn, err := net.Dial("tcp", "xrdp:3389")
 		if err != nil {
 			log.Printf("error occurred %v", err)
 		}
