@@ -5,8 +5,8 @@ services:
       - STORAGE_LOCATION=/opt/storage
     volumes:
       - ./storage:/opt/storage
-    # ports:
-    #   - "3389:3389"
+    ports:
+      - "3389:3389"
   # connection-exporter:
   #   build: connection-exporter
   xrdp:
@@ -16,4 +16,4 @@ services:
       - FRX_XRDP_USER_PASSWORD=MyPassword
     ports:
       - "22000:22"
-      - "3389:3389"
+      #- "3389:3389"

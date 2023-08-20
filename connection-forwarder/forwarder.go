@@ -1,22 +1,82 @@
 package main
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/tls"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/pem"
 	"fmt"
 	"io"
 	"log"
+	"math"
+	"math/big"
+	mrand "math/rand"
 	"net"
 	"os"
 	"sync"
+	"time"
 )
 
 func init() {
 	log.SetFlags(log.LUTC | log.Llongfile)
 }
 
-func main() {
-	lr, err := net.Listen("tcp", ":3389")
+type x509certificate struct {
+	certificate []byte
+	priv        []byte
+	pub         []byte
+}
+
+func generateCertificate() (*x509certificate, error) {
+	priv, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
-		log.Fatalf("%v", err)
+		return nil, err
+	}
+
+	x509Cert := x509.Certificate{
+		SerialNumber: big.NewInt(mrand.Int63n(math.MaxInt64)),
+		Subject: pkix.Name{
+			Organization:  []string{"private, INC."},
+			Country:       []string{"FI"},
+			Province:      []string{"Uusimaa"},
+			Locality:      []string{"Helsinki"},
+			StreetAddress: []string{""},
+			PostalCode:    []string{"0200"},
+		},
+		NotBefore:             time.Now(),
+		NotAfter:              time.Now().AddDate(10, 0, 0),
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
+		KeyUsage:              x509.KeyUsageDigitalSignature,
+		BasicConstraintsValid: true,
+	}
+
+	certificate, err := x509.CreateCertificate(rand.Reader, &x509Cert, &x509Cert, &priv.PublicKey, priv)
+	if err != nil {
+		return nil, err
+	}
+	return &x509certificate{
+		certificate: pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: certificate}),
+		priv:        pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(priv)}),
+	}, nil
+}
+func main() {
+	cert, err := generateCertificate()
+	if err != nil {
+		log.Fatalf("forwarder: error occurred %v", err)
+	}
+	tlsCertificate, err := tls.X509KeyPair(cert.certificate, cert.priv)
+	if err != nil {
+		log.Fatalf("forwarder: error occurred %v", err)
+	}
+
+	lr, err := tls.Listen("tcp", ":3389", &tls.Config{
+		InsecureSkipVerify: true,
+		Certificates:       []tls.Certificate{tlsCertificate},
+	})
+	if err != nil {
+		log.Fatalf("forwarder: error occurred %v", err)
 	}
 
 	log.Println("listener is running at 3389")
@@ -31,10 +91,18 @@ func main() {
 		}
 
 		sr := &SessionRecorder{
-			once:      sync.Once{},
-			sessionID: "",
-			path:      os.Getenv("STORAGE_LOCATION"),
+			sessionID: fmt.Sprintf("%v", mrand.Int63n(math.MaxInt64)),
 		}
+		if err := os.MkdirAll(os.Getenv("STORAGE_LOCATION"), 0777); err != nil {
+			log.Printf("%v", err)
+			return
+		}
+		storage, err := os.Create(fmt.Sprintf("%v/%v", os.Getenv("STORAGE_LOCATION"), sr.sessionID))
+		if err != nil {
+			return
+		}
+		sr.storage = storage
+
 		go func(srcConn, targetConn net.Conn, sr *SessionRecorder) {
 			handleConnection(srcConn, targetConn, sr)
 		}(srcConn, targetConn, sr)
@@ -76,23 +144,11 @@ func handleConnection(srcConn, targetConn net.Conn, sr *SessionRecorder) (err er
 }
 
 type SessionRecorder struct {
-	once      sync.Once
 	sessionID string
-	path      string
 	storage   *os.File
 }
 
 func (sr *SessionRecorder) Write(b []byte) (n int, err error) {
-	sr.once.Do(func() {
-		if err := os.MkdirAll(sr.path, 0700); err != nil {
-			log.Printf("%v", err)
-			return
-		}
-		sr.storage, err = os.Create(fmt.Sprintf("path/%v", sr.sessionID))
-		if err != nil {
-			return
-		}
-	})
 	return sr.storage.Write(b)
 }
 
