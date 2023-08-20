@@ -1,0 +1,17 @@
+services:
+  connection-forwarder:
+    build: connection-forwarder
+    environment:
+      - STORAGE_LOCATION=/opt/storage
+    volumes:
+      - ./storage:/opt/storage
+  # connection-exporter:
+  #   build: connection-exporter
+  remote-target:
+    image: frxyt/xrdp:xfce
+    environment:
+      - FRX_XRDP_USER_NAME=john.doe
+      - FRX_XRDP_USER_PASSWORD=MyPassword
+    ports:
+      - "22000:22"
+      - "3389:3389"
