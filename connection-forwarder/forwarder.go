@@ -71,12 +71,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("forwarder: error occurred %v", err)
 	}
-
-	lr, err := tls.Listen("tcp", ":3389",
-		&tls.Config{
-			InsecureSkipVerify: true,
-			Certificates:       []tls.Certificate{tlsCertificate},
-		})
+	log.Println(tlsCertificate)
+	lr, err := net.Listen("tcp", ":3389")
 	if err != nil {
 		log.Fatalf("forwarder: error occurred %v", err)
 	}
@@ -87,27 +83,29 @@ func main() {
 		srcConn, err := lr.Accept()
 		if err != nil {
 			log.Printf("error occurred %v", err)
-			return
+			continue
 		}
-		defer func() {
-			_ = srcConn.Close()
-		}()
-
-		targetConn, err := net.Dial("tcp", "xrdp:3389")
+		targetConn, err := net.Dial("tcp", "guacd:4822")
 		if err != nil {
 			log.Printf("error occurred %v", err)
-			return
+			_ = srcConn.Close()
+			continue
 		}
-		defer func() {
-			_ = targetConn.Close()
-		}()
 
 		serve(srcConn, targetConn)
-	}
 
+		_ = srcConn.Close()
+		_ = targetConn.Close()
+
+	}
 }
 
 func serve(srcConn, targetConn net.Conn) {
+	defer func() {
+		_ = srcConn.Close()
+		_ = targetConn.Close()
+	}()
+
 	sr := &SessionRecorder{
 		sessionID: fmt.Sprintf("%v", mrand.Int63n(math.MaxInt64)),
 	}
