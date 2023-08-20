@@ -93,10 +93,6 @@ func main() {
 		}
 
 		serve(srcConn, targetConn)
-
-		_ = srcConn.Close()
-		_ = targetConn.Close()
-
 	}
 }
 
