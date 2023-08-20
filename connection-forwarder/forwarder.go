@@ -21,6 +21,7 @@ import (
 
 func init() {
 	log.SetFlags(log.LUTC | log.Llongfile)
+	log.SetPrefix("=> ")
 }
 
 type x509certificate struct {
@@ -71,42 +72,58 @@ func main() {
 		log.Fatalf("forwarder: error occurred %v", err)
 	}
 
-	lr, err := tls.Listen("tcp", ":3389", &tls.Config{
-		InsecureSkipVerify: true,
-		Certificates:       []tls.Certificate{tlsCertificate},
-	})
+	lr, err := tls.Listen("tcp", ":3389",
+		&tls.Config{
+			InsecureSkipVerify: true,
+			Certificates:       []tls.Certificate{tlsCertificate},
+		})
 	if err != nil {
 		log.Fatalf("forwarder: error occurred %v", err)
 	}
 
 	log.Println("listener is running at 3389")
+
 	for {
 		srcConn, err := lr.Accept()
 		if err != nil {
 			log.Printf("error occurred %v", err)
+			return
 		}
+		defer func() {
+			_ = srcConn.Close()
+		}()
+
 		targetConn, err := net.Dial("tcp", "xrdp:3389")
 		if err != nil {
 			log.Printf("error occurred %v", err)
-		}
-
-		sr := &SessionRecorder{
-			sessionID: fmt.Sprintf("%v", mrand.Int63n(math.MaxInt64)),
-		}
-		if err := os.MkdirAll(os.Getenv("STORAGE_LOCATION"), 0777); err != nil {
-			log.Printf("%v", err)
 			return
 		}
-		storage, err := os.Create(fmt.Sprintf("%v/%v", os.Getenv("STORAGE_LOCATION"), sr.sessionID))
-		if err != nil {
-			return
-		}
-		sr.storage = storage
+		defer func() {
+			_ = targetConn.Close()
+		}()
 
-		go func(srcConn, targetConn net.Conn, sr *SessionRecorder) {
-			handleConnection(srcConn, targetConn, sr)
-		}(srcConn, targetConn, sr)
+		serve(srcConn, targetConn)
 	}
+
+}
+
+func serve(srcConn, targetConn net.Conn) {
+	sr := &SessionRecorder{
+		sessionID: fmt.Sprintf("%v", mrand.Int63n(math.MaxInt64)),
+	}
+	if err := os.MkdirAll(os.Getenv("STORAGE_LOCATION"), 0777); err != nil {
+		log.Printf("%v", err)
+		return
+	}
+	storage, err := os.Create(fmt.Sprintf("%v/%v", os.Getenv("STORAGE_LOCATION"), sr.sessionID))
+	if err != nil {
+		return
+	}
+	sr.storage = storage
+
+	go func(srcConn, targetConn net.Conn, sr *SessionRecorder) {
+		handleConnection(srcConn, targetConn, sr)
+	}(srcConn, targetConn, sr)
 }
 
 func handleConnection(srcConn, targetConn net.Conn, sr *SessionRecorder) (err error) {
