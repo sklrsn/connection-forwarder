@@ -5,6 +5,8 @@ services:
       - STORAGE_LOCATION=/opt/storage
     volumes:
       - ./storage:/opt/storage
+    # ports:
+    #   - "3389:3389"
   # connection-exporter:
   #   build: connection-exporter
   xrdp:

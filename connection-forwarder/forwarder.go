@@ -43,28 +43,32 @@ func main() {
 
 func handleConnection(srcConn, targetConn net.Conn, sr *SessionRecorder) (err error) {
 	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		dst := io.MultiWriter(sr, srcConn)
-		n, err := io.Copy(dst, targetConn)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		log.Printf("reverse: wrote %d bytes", n)
+	defer func() {
+		_ = srcConn.Close()
+		_ = targetConn.Close()
+		_ = sr.Close()
 	}()
 
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		dst := io.MultiWriter(sr, targetConn)
-		n, err := io.Copy(dst, srcConn)
+		n, err := io.Copy(io.MultiWriter(sr, targetConn), srcConn)
 		if err != nil {
-			log.Println(err)
+			log.Printf("forward: connection error %v", err)
 			return
 		}
 		log.Printf("forward: wrote %d bytes", n)
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		n, err := io.Copy(io.MultiWriter(sr, srcConn), targetConn)
+		if err != nil {
+			log.Printf("reverse: connection error %v", err)
+			return
+		}
+		log.Printf("reverse: wrote %d bytes", n)
 	}()
 	wg.Wait()
 
@@ -94,4 +98,11 @@ func (sr *SessionRecorder) Write(b []byte) (n int, err error) {
 
 func (sr *SessionRecorder) Read(b []byte) (n int, err error) {
 	return sr.storage.Read(b)
+}
+
+func (sr *SessionRecorder) Close() (err error) {
+	if sr.storage != nil {
+		err = sr.storage.Close()
+	}
+	return
 }
