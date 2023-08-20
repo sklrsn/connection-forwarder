@@ -92,7 +92,7 @@ func main() {
 			continue
 		}
 
-		serve(srcConn, targetConn)
+		go serve(srcConn, targetConn)
 	}
 }
 
@@ -115,9 +115,7 @@ func serve(srcConn, targetConn net.Conn) {
 	}
 	sr.storage = storage
 
-	go func(srcConn, targetConn net.Conn, sr *SessionRecorder) {
-		handleConnection(srcConn, targetConn, sr)
-	}(srcConn, targetConn, sr)
+	handleConnection(srcConn, targetConn, sr)
 }
 
 func handleConnection(srcConn, targetConn net.Conn, sr *SessionRecorder) (err error) {
