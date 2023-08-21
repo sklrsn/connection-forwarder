@@ -4,6 +4,7 @@ services:
     privileged: true
     environment:
       - STORAGE_LOCATION=/opt/storage
+      - PROTOCOL=VNC
     volumes:
       - ./storage:/opt/storage
     ports:

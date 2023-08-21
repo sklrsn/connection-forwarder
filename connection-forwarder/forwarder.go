@@ -71,13 +71,23 @@ func main() {
 	if err != nil {
 		log.Fatalf("forwarder: error occurred %v", err)
 	}
-	log.Println(tlsCertificate.OCSPStaple)
-	lr, err := net.Listen("tcp", ":5900")
+	var lr net.Listener
+	switch protocol := os.Getenv("PROTOCOL"); protocol {
+	case "RDP":
+		lr, err = tls.Listen("tcp", ":3389", &tls.Config{
+			InsecureSkipVerify: true,
+			Certificates:       []tls.Certificate{tlsCertificate},
+		})
+	case "VNC":
+		lr, err = net.Listen("tcp", ":5900")
+	default:
+		log.Fatal()
+	}
 	if err != nil {
 		log.Fatalf("forwarder: error occurred %v", err)
 	}
 
-	log.Println("listener is running at 5900")
+	log.Printf("listener is running at %v", lr.Addr())
 
 	for {
 		srcConn, err := lr.Accept()
