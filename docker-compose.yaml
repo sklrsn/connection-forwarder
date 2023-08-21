@@ -6,23 +6,22 @@ services:
       - STORAGE_LOCATION=/opt/storage
     volumes:
       - ./storage:/opt/storage
-    ports:
-      - "3389:3389"
+    # ports:
+    #   - "3389:3389"
   # connection-exporter:
   #   build: connection-exporter
   xrdp:
     image: frxyt/xrdp:xfce
     environment:
-      - FRX_XRDP_USER_NAME=john.doe
-      - FRX_XRDP_USER_PASSWORD=MyPassword
+      - FRX_XRDP_USER_NAME=john
+      - FRX_XRDP_USER_PASSWORD=john
     ports:
       - "22000:22"
-      #- "3389:3389"
+      - "3389:3389"
 
   guacd:
-    image: glyptodon/guacd
+    image: guacamole/guacd
     ports:
       - "4822:4822"
     environment:
-      - ACCEPT_EULA=Y
-      - LOG_LEVEL=trace
+      - GUACD_LOG_LEVEL=trace
