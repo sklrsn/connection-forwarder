@@ -6,22 +6,32 @@ services:
       - STORAGE_LOCATION=/opt/storage
     volumes:
       - ./storage:/opt/storage
-    # ports:
-    #   - "3389:3389"
+    ports:
+      - "5900:5900"
+
   # connection-exporter:
   #   build: connection-exporter
-  xrdp:
-    image: frxyt/xrdp:xfce
-    environment:
-      - FRX_XRDP_USER_NAME=john
-      - FRX_XRDP_USER_PASSWORD=john
-    ports:
-      - "22000:22"
-      - "3389:3389"
 
-  guacd:
-    image: guacamole/guacd
+  vnc-server:
+    image: consol/rocky-xfce-vnc
     ports:
-      - "4822:4822"
+      - "5901:5901"
+      - "6901:6901"
     environment:
-      - GUACD_LOG_LEVEL=trace
+      - VNC_PW=sklrsn
+
+  # xrdp-server:
+  #   image: frxyt/xrdp:xfce
+  #   environment:
+  #     - FRX_XRDP_USER_NAME=sklrsn
+  #     - FRX_XRDP_USER_PASSWORD=sklrsn
+  #   ports:
+  #     - "22000:22"
+  #     #- "3389:3389"
+
+  # guacd:
+  #   image: guacamole/guacd
+  #   ports:
+  #     - "4822:4822"
+  #   environment:
+  #     - GUACD_LOG_LEVEL=trace

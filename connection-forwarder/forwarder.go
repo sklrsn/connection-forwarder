@@ -71,13 +71,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("forwarder: error occurred %v", err)
 	}
-	log.Println(tlsCertificate)
-	lr, err := net.Listen("tcp", ":3389")
+	log.Println(tlsCertificate.OCSPStaple)
+	lr, err := net.Listen("tcp", ":5900")
 	if err != nil {
 		log.Fatalf("forwarder: error occurred %v", err)
 	}
 
-	log.Println("listener is running at 3389")
+	log.Println("listener is running at 5900")
 
 	for {
 		srcConn, err := lr.Accept()
@@ -85,13 +85,12 @@ func main() {
 			log.Printf("error occurred %v", err)
 			continue
 		}
-		targetConn, err := net.Dial("tcp", "guacd:4822")
+		targetConn, err := net.Dial("tcp", "vnc-server:5901")
 		if err != nil {
 			log.Printf("error occurred %v", err)
 			_ = srcConn.Close()
 			continue
 		}
-
 		go serve(srcConn, targetConn)
 	}
 }
