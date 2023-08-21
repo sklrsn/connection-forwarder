@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/hex"
 	"encoding/pem"
 	"fmt"
 	"io"
@@ -167,6 +168,7 @@ type SessionRecorder struct {
 }
 
 func (sr *SessionRecorder) Write(b []byte) (n int, err error) {
+	log.Printf("%v", hex.Dump(b))
 	return sr.storage.Write(b)
 }
 
