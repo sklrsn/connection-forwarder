@@ -10,8 +10,12 @@ services:
     ports:
       - "5900:5900"
 
-  # connection-exporter:
-  #   build: connection-exporter
+  connection-exporter:
+    build: connection-exporter
+    volumes:
+      - ./storage:/opt/storage
+    ports:
+      - "9900:9900"
 
   vnc-server:
     image: consol/rocky-xfce-vnc
