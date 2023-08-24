@@ -17,7 +17,7 @@ func main() {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	http.Handle("/list", http.FileServer(http.Dir("/opt/storage")))
+	http.Handle("/", http.FileServer(http.Dir("/opt/storage")))
 
 	http.HandleFunc("/encode", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
