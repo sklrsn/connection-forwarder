@@ -1,12 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -14,6 +16,7 @@ import (
 
 func init() {
 	log.SetFlags(log.LUTC | log.Lshortfile)
+	log.SetPrefix("=>")
 }
 
 func main() {
@@ -112,16 +115,32 @@ func (avi Avi) Transform() error {
 		return err
 	}
 
-	out, err := os.Create(fmt.Sprintf("/opt/storage/%v", avi.enrichmentID))
+	out, err := os.Create(fmt.Sprintf("/opt/downloads/%v", avi.enrichmentID))
 	if err != nil {
 		return err
 	}
 
-	encCmd := exec.Command(fmt.Sprintf("ffmpeg -i pipe: -c:v %v -f avi pipe:", avi.codec))
+	cmdStr := strings.Builder{}
+	if _, err := cmdStr.Write([]byte("-i pipe: ")); err != nil {
+		return err
+	}
+	if _, err := cmdStr.Write([]byte(fmt.Sprintf("-c:v %v ", avi.codec))); err != nil {
+		return err
+	}
+	if _, err := cmdStr.Write([]byte("-f avi pipe:")); err != nil {
+		return err
+	}
+	log.Printf("Executing command ffmpeg :%v", cmdStr.String())
+
+	var errBuffer bytes.Buffer
+	encCmd := exec.Command("/usr/local/bin/ffmpeg", cmdStr.String())
 	encCmd.Stdin = in
 	encCmd.Stdout = out
-
+	encCmd.Stderr = &errBuffer
 	if err := encCmd.Run(); err != nil {
+		if errBuffer.Available() > 0 {
+			return fmt.Errorf("%v", errBuffer.String())
+		}
 		return err
 	}
 
