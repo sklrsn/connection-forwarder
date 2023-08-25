@@ -1,23 +1,13 @@
 package main
 
 import (
-	"crypto/rand"
-	"crypto/rsa"
-	"crypto/tls"
-	"crypto/x509"
-	"crypto/x509/pkix"
 	"encoding/hex"
-	"encoding/pem"
 	"fmt"
 	"io"
 	"log"
-	"math"
-	"math/big"
-	mrand "math/rand"
 	"net"
 	"os"
 	"sync"
-	"time"
 
 	"github.com/google/uuid"
 )
@@ -27,65 +17,10 @@ func init() {
 	log.SetPrefix("=> ")
 }
 
-type x509certificate struct {
-	certificate []byte
-	priv        []byte
-	pub         []byte
-}
-
-func generateCertificate() (*x509certificate, error) {
-	priv, err := rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		return nil, err
-	}
-
-	x509Cert := x509.Certificate{
-		SerialNumber: big.NewInt(mrand.Int63n(math.MaxInt64)),
-		Subject: pkix.Name{
-			Organization:  []string{"private, INC."},
-			Country:       []string{"FI"},
-			Province:      []string{"Uusimaa"},
-			Locality:      []string{"Helsinki"},
-			StreetAddress: []string{""},
-			PostalCode:    []string{"0200"},
-		},
-		NotBefore:             time.Now(),
-		NotAfter:              time.Now().AddDate(10, 0, 0),
-		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
-		KeyUsage:              x509.KeyUsageDigitalSignature,
-		BasicConstraintsValid: true,
-	}
-
-	certificate, err := x509.CreateCertificate(rand.Reader, &x509Cert, &x509Cert, &priv.PublicKey, priv)
-	if err != nil {
-		return nil, err
-	}
-	return &x509certificate{
-		certificate: pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: certificate}),
-		priv:        pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(priv)}),
-	}, nil
-}
 func main() {
-	cert, err := generateCertificate()
-	if err != nil {
-		log.Fatalf("forwarder: error occurred %v", err)
-	}
-	tlsCertificate, err := tls.X509KeyPair(cert.certificate, cert.priv)
-	if err != nil {
-		log.Fatalf("forwarder: error occurred %v", err)
-	}
 	var lr net.Listener
-	switch protocol := os.Getenv("PROTOCOL"); protocol {
-	case "RDP":
-		lr, err = tls.Listen("tcp", ":3389", &tls.Config{
-			InsecureSkipVerify: true,
-			Certificates:       []tls.Certificate{tlsCertificate},
-		})
-	case "VNC":
-		lr, err = net.Listen("tcp", ":5900")
-	default:
-		log.Fatal()
-	}
+	var err error
+	lr, err = net.Listen("tcp", ":5900")
 	if err != nil {
 		log.Fatalf("forwarder: error occurred %v", err)
 	}

@@ -1,22 +1,31 @@
 services:
-  connection-forwarder:
-    build: connection-forwarder
+  vnc-forwarder:
+    build: vnc-forwarder
     privileged: true
     environment:
       - STORAGE_LOCATION=/opt/storage
-      - PROTOCOL=VNC
     volumes:
       - ./storage:/opt/storage
     ports:
       - "5900:5900"
 
-  connection-exporter:
-    build: connection-exporter
+  rdp-forwarder:
+    build: rdp-forwarder
+    privileged: true
+    environment:
+      - STORAGE_LOCATION=/opt/storage
     volumes:
       - ./storage:/opt/storage
-      - ./downloads:/opt/downloads
     ports:
-      - "9900:9900"
+      - "3389:3389"
+
+  # connection-exporter:
+  #   build: connection-exporter
+  #   volumes:
+  #     - ./storage:/opt/storage
+  #     - ./downloads:/opt/downloads
+  #   ports:
+  #     - "9900:9900"
 
   vnc-server:
     image: consol/rocky-xfce-vnc
@@ -24,20 +33,20 @@ services:
       - "5901:5901"
       - "6901:6901"
     environment:
-      - VNC_PW=sklrsn
+      - VNC_PW=guest
 
-  # xrdp-server:
-  #   image: frxyt/xrdp:xfce
-  #   environment:
-  #     - FRX_XRDP_USER_NAME=sklrsn
-  #     - FRX_XRDP_USER_PASSWORD=sklrsn
-  #   ports:
-  #     - "22000:22"
-  #     #- "3389:3389"
+  xrdp-server:
+    image: frxyt/xrdp:xfce
+    environment:
+      - FRX_XRDP_USER_NAME=sklrsn
+      - FRX_XRDP_USER_PASSWORD=sklrsn
+    ports:
+      - "22000:22"
+      - "33890:3389"
 
-  # guacd:
-  #   image: guacamole/guacd
-  #   ports:
-  #     - "4822:4822"
-  #   environment:
-  #     - GUACD_LOG_LEVEL=trace
+  guacd:
+    image: guacamole/guacd
+    ports:
+      - "4822:4822"
+    environment:
+      - GUACD_LOG_LEVEL=trace
