@@ -12,12 +12,17 @@ func init() {
 func main() {
 	log.Println("starting exporter at 9900")
 
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/storage", http.StatusMovedPermanently)
+	})
+
 	http.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 	})
 
-	http.Handle("/", http.FileServer(http.Dir("/opt/storage")))
+	http.Handle("/storage", http.StripPrefix("/storage", http.FileServer(http.Dir("/opt/storage"))))
+	http.Handle("/enriched", http.StripPrefix("/enriched", http.FileServer(http.Dir("/opt/downloads"))))
 
 	http.HandleFunc("/encode", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
@@ -25,7 +30,6 @@ func main() {
 
 			log.Printf("Received storage id %v for encode", storageID)
 			w.WriteHeader(http.StatusOK)
-
 			return
 		} else {
 			http.Error(w, "unsupported http method", http.StatusBadRequest)
