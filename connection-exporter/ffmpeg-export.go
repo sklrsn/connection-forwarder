@@ -107,12 +107,12 @@ type Avi struct {
 }
 
 func (avi Avi) Transform() error {
-	in, err := os.Open(avi.storageID)
+	in, err := os.Open(fmt.Sprintf("/opt/storage/%v", avi.storageID))
 	if err != nil {
 		return err
 	}
 
-	out, err := os.Create(fmt.Sprintf("%v.avi", avi.enrichmentID))
+	out, err := os.Create(fmt.Sprintf("/opt/storage/%v", avi.enrichmentID))
 	if err != nil {
 		return err
 	}
