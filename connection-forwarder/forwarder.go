@@ -18,6 +18,8 @@ import (
 	"os"
 	"sync"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 func init() {
@@ -113,7 +115,7 @@ func serve(srcConn, targetConn net.Conn) {
 	}()
 
 	sr := &SessionRecorder{
-		sessionID: fmt.Sprintf("%v", mrand.Int63n(math.MaxInt64)),
+		sessionID: fmt.Sprintf("%v", uuid.NewString()),
 	}
 	if err := os.MkdirAll(os.Getenv("STORAGE_LOCATION"), 0777); err != nil {
 		log.Printf("%v", err)
