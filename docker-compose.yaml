@@ -36,10 +36,11 @@ services:
       - VNC_PW=guest
 
   xrdp-server:
-    image: frxyt/xrdp:xfce
-    environment:
-      - FRX_XRDP_USER_NAME=sklrsn
-      - FRX_XRDP_USER_PASSWORD=sklrsn
+    image: danchitnis/xrdp:ubuntu-xfce
+    command:
+      - guest
+      - guest
+      - yes
     ports:
       - "22000:22"
       - "33890:3389"
