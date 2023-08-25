@@ -1,4 +1,4 @@
-module github.com/sklrsn/video-convertor/connection-forwarder
+module github.com/sklrsn/video-convertor/vnc-forwarder
 
 go 1.21.0
 
