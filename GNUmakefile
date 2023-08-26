@@ -1,6 +1,6 @@
 .DEFAULT_GOAL: all
 
-all: up down
+all: down up
 
 .PHONY: setup
 setup:

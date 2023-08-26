@@ -25,7 +25,7 @@ ADD . .
 RUN go mod download && \ 
     go mod vendor -v
 
-RUN go build -o /opt/forwarder/connection-forwarder && \
+RUN go build -o /opt/forwarder/connection-forwarder *.go && \
     chmod +x /opt/forwarder/connection-forwarder
 
 RUN mkdir -p /opt/forwarder && \

@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/sklrsn/video-convertor/rdp-forwarder/guacd"
 )
 
 func init() {
@@ -91,13 +92,102 @@ func main() {
 			log.Printf("error occurred %v", err)
 			continue
 		}
-		targetConn, err := net.Dial("tcp", "xrdp-server:33890")
+
+		guacdConn, err := net.Dial("tcp", os.Getenv("GUACD_ADDR"))
 		if err != nil {
 			log.Printf("error occurred %v", err)
 			_ = srcConn.Close()
 			continue
 		}
-		go serve(srcConn, targetConn)
+
+		fc, err := guacd.NewForwarderConnection(srcConn, guacdConn, os.Getenv("TARGET_ADDR"))
+		if err != nil {
+			log.Printf("error occurred %v", err)
+			_ = srcConn.Close()
+			_ = guacdConn.Close()
+			continue
+		}
+
+		if err := fc.Forward.WriteGuacamoleMessage(
+			guacd.GuacamoleMessage{
+				OpCode: "select",
+				Args:   []string{"vnc"},
+			}); err != nil {
+			log.Printf("error occurred %v", err)
+			_ = srcConn.Close()
+			_ = guacdConn.Close()
+			continue
+		}
+
+		msg, err := fc.Forward.ReadGuacamoleMessage()
+		if err != nil {
+			log.Printf("error occurred %v", err)
+			_ = srcConn.Close()
+			_ = guacdConn.Close()
+			continue
+		}
+		log.Println(msg)
+
+		if err := fc.Forward.WriteGuacamoleMessage(guacd.GuacamoleMessage{
+			OpCode: "size",
+			Args:   []string{"1024", "768", "96"},
+		}); err != nil {
+			log.Printf("error occurred %v", err)
+			_ = srcConn.Close()
+			_ = guacdConn.Close()
+			continue
+		}
+
+		if err := fc.Forward.WriteGuacamoleMessage(guacd.GuacamoleMessage{
+			OpCode: "audio",
+			Args:   []string{"audio/ogg"},
+		}); err != nil {
+			log.Printf("error occurred %v", err)
+			_ = srcConn.Close()
+			_ = guacdConn.Close()
+			continue
+		}
+
+		if err := fc.Forward.WriteGuacamoleMessage(guacd.GuacamoleMessage{
+			OpCode: "video",
+			Args:   []string{},
+		}); err != nil {
+			log.Printf("error occurred %v", err)
+			_ = srcConn.Close()
+			_ = guacdConn.Close()
+			continue
+		}
+
+		if err := fc.Forward.WriteGuacamoleMessage(guacd.GuacamoleMessage{
+			OpCode: "image",
+			Args:   []string{"image/png", "image/jpeg"},
+		}); err != nil {
+			log.Printf("error occurred %v", err)
+			_ = srcConn.Close()
+			_ = guacdConn.Close()
+			continue
+		}
+
+		if err := fc.Forward.WriteGuacamoleMessage(guacd.GuacamoleMessage{
+			OpCode: "timezone",
+			Args:   []string{"Europe/Helsinki"},
+		}); err != nil {
+			log.Printf("error occurred %v", err)
+			_ = srcConn.Close()
+			_ = guacdConn.Close()
+			continue
+		}
+
+		if err := fc.Forward.WriteGuacamoleMessage(guacd.GuacamoleMessage{
+			OpCode: "timezone",
+			Args:   []string{"Europe/Helsinki"},
+		}); err != nil {
+			log.Printf("error occurred %v", err)
+			_ = srcConn.Close()
+			_ = guacdConn.Close()
+			continue
+		}
+
 	}
 }
 

@@ -14,6 +14,8 @@ services:
     privileged: true
     environment:
       - STORAGE_LOCATION=/opt/storage
+      - GUACD_ADDR=guacd:4822
+      - TARGET_ADDR=xrdp-server:33890
     volumes:
       - ./storage:/opt/storage
     ports:
@@ -33,7 +35,7 @@ services:
       - "5901:5901"
       - "6901:6901"
     environment:
-      - VNC_PW=guest
+      - "VNC_PW=guest"
 
   xrdp-server:
     image: danchitnis/xrdp:ubuntu-xfce
@@ -46,7 +48,7 @@ services:
       - "33890:3389"
 
   guacd:
-    image: guacamole/guacd
+    image: guacamole/guacd:1.5.3
     ports:
       - "4822:4822"
     environment:
