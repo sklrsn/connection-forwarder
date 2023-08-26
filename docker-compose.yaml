@@ -15,7 +15,7 @@ services:
     environment:
       - STORAGE_LOCATION=/opt/storage
       - GUACD_ADDR=guacd:4822
-      - TARGET_ADDR=xrdp-server:33890
+      - TARGET_ADDR=vnc-server:5901
     volumes:
       - ./storage:/opt/storage
     ports:

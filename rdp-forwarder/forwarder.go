@@ -127,7 +127,6 @@ func main() {
 			_ = guacdConn.Close()
 			continue
 		}
-		log.Println(msg)
 
 		if err := fc.Forward.WriteGuacamoleMessage(guacd.GuacamoleMessage{
 			OpCode: "size",
@@ -192,6 +191,48 @@ func main() {
 				connArgs = append(connArgs, "guest")
 			case "password":
 				connArgs = append(connArgs, "guest")
+			case "swap-red-blue":
+				connArgs = append(connArgs, "false")
+			case "read-only":
+				connArgs = append(connArgs, "false")
+			case "color-depth":
+				connArgs = append(connArgs, "0")
+			case "force-lossless":
+				connArgs = append(connArgs, "true")
+			case "dest-port":
+				connArgs = append(connArgs, "0")
+			case "autoretry":
+				connArgs = append(connArgs, "0")
+			case "reverse-connect":
+				connArgs = append(connArgs, "true")
+			case "listen-timeout":
+				connArgs = append(connArgs, "5000")
+			case "enable-audio":
+				connArgs = append(connArgs, "true")
+			case "enable-sftp":
+				connArgs = append(connArgs, "true")
+			case "sftp-server-alive-interval":
+				connArgs = append(connArgs, "0")
+			case "sftp-disable-download":
+				connArgs = append(connArgs, "false")
+			case "sftp-disable-upload":
+				connArgs = append(connArgs, "false")
+			case "recording-exclude-output":
+				connArgs = append(connArgs, "false")
+			case "recording-exclude-mouse":
+				connArgs = append(connArgs, "false")
+			case "recording-include-keys":
+				connArgs = append(connArgs, "false")
+			case "create-recording-path":
+				connArgs = append(connArgs, "false")
+			case "disable-copy":
+				connArgs = append(connArgs, "false")
+			case "disable-paste":
+				connArgs = append(connArgs, "false")
+			case "wol-send-packet":
+				connArgs = append(connArgs, "false")
+			case "encodings":
+				connArgs = append(connArgs, "ISO8859-1")
 			default:
 				connArgs = append(connArgs, fmt.Sprintf("%v.", 0))
 			}
