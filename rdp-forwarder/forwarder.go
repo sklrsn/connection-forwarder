@@ -233,6 +233,8 @@ func main() {
 				connArgs = append(connArgs, "false")
 			case "encodings":
 				connArgs = append(connArgs, "ISO8859-1")
+			case "clipboard-encoding":
+				connArgs = append(connArgs, "ISO8859-1")
 			default:
 				connArgs = append(connArgs, fmt.Sprintf("%v.", 0))
 			}
