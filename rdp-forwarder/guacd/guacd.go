@@ -3,6 +3,7 @@ package guacd
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"net"
 	"strings"
 	"sync"
@@ -12,8 +13,6 @@ type ForwarderConnection struct {
 	Forward *GuacamoleConnection
 	Reverse *GuacamoleConnection
 
-	targetAddr string
-
 	once  sync.Once
 	m     sync.RWMutex
 	condn sync.Cond
@@ -22,18 +21,26 @@ type ForwarderConnection struct {
 func NewForwarderConnection(srcConn, guacdConn net.Conn) (*ForwarderConnection, error) {
 	return &ForwarderConnection{
 		Reverse: &GuacamoleConnection{
-			conn: srcConn,
+			conn:      srcConn,
+			br:        bufio.NewReader(srcConn),
+			direction: "reverse",
 		},
 		Forward: &GuacamoleConnection{
-			conn: guacdConn,
-			br:   bufio.NewReader(guacdConn),
+			conn:      guacdConn,
+			br:        bufio.NewReader(guacdConn),
+			direction: "forward",
 		},
 	}, nil
 }
 
 type GuacamoleConnection struct {
-	conn net.Conn
-	br   *bufio.Reader
+	conn      net.Conn
+	br        *bufio.Reader
+	direction string
+}
+
+func (gc *GuacamoleConnection) GetRawConn() net.Conn {
+	return gc.conn
 }
 
 func (gc *GuacamoleConnection) ReadGuacamoleMessage() (GuacamoleMessage, error) {
@@ -41,14 +48,17 @@ func (gc *GuacamoleConnection) ReadGuacamoleMessage() (GuacamoleMessage, error) 
 	if err != nil {
 		return GuacamoleMessage{}, err
 	}
-	return gc.DeSerializeRawMessage(rawMessage), nil
+	log.Printf("direction=%v reading %v", gc.direction, string(rawMessage))
+	return gc.deSerializeRawMessage(rawMessage), nil
 }
 
 func (gc *GuacamoleConnection) WriteGuacamoleMessage(gcm GuacamoleMessage) error {
-	msg, err := gc.SerializeGuacamoleMessage(gcm)
+	msg, err := gc.serializeGuacamoleMessage(gcm)
 	if err != nil {
 		return err
 	}
+
+	log.Printf("direction=%v writing %v", gc.direction, string(msg))
 
 	if _, err := gc.writeBytes([]byte(msg)); err != nil {
 		return err
@@ -69,22 +79,29 @@ type GuacamoleMessage struct {
 	Args   []string
 }
 
-func (gc *GuacamoleConnection) SerializeGuacamoleMessage(gm GuacamoleMessage) (string, error) {
+func (gc *GuacamoleConnection) serializeGuacamoleMessage(gm GuacamoleMessage) (string, error) {
 	var wireMessage strings.Builder
 
 	args := make([]string, 0)
 	args = append(args, fmt.Sprintf("%v.%v", len(gm.OpCode), gm.OpCode))
 
-	if len(gm.Args) > 0 {
-		for _, arg := range gm.Args {
-			args = append(args, fmt.Sprintf("%v.%v", len(arg), arg))
+	if gm.Args != nil {
+		if len(gm.Args) > 0 {
+			for _, arg := range gm.Args {
+				arg = strings.TrimSpace(arg)
+				args = append(args, fmt.Sprintf("%v.%v", len(arg), arg))
+			}
+		} else {
+			args = append(args, fmt.Sprintf("%v.", 0))
+		}
+
+		if _, err := wireMessage.WriteString(strings.Join(args, ",")); err != nil {
+			return "", err
 		}
 	} else {
-		args = append(args, fmt.Sprintf("%v.", 0))
-	}
-
-	if _, err := wireMessage.WriteString(strings.Join(args, ",")); err != nil {
-		return "", err
+		if _, err := wireMessage.WriteString(string(strings.Join(args, ""))); err != nil {
+			return "", err
+		}
 	}
 
 	if _, err := wireMessage.WriteString(";"); err != nil {
@@ -94,7 +111,7 @@ func (gc *GuacamoleConnection) SerializeGuacamoleMessage(gm GuacamoleMessage) (s
 	return wireMessage.String(), nil
 }
 
-func (gc *GuacamoleConnection) SerializeRawMessage(args []string) (string, error) {
+func (gc *GuacamoleConnection) serializeRawMessage(args []string) (string, error) {
 	var msg strings.Builder
 
 	for _, arg := range args {
@@ -110,7 +127,7 @@ func (gc *GuacamoleConnection) SerializeRawMessage(args []string) (string, error
 	return msg.String(), nil
 }
 
-func (gc *GuacamoleConnection) DeSerializeRawMessage(message []byte) GuacamoleMessage {
+func (gc *GuacamoleConnection) deSerializeRawMessage(message []byte) GuacamoleMessage {
 	var gm GuacamoleMessage
 
 	msgStr := strings.TrimSpace(strings.ReplaceAll(string(message), ";", ""))

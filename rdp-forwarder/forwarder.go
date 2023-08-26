@@ -3,10 +3,8 @@ package main
 import (
 	"crypto/rand"
 	"crypto/rsa"
-	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
-	"encoding/hex"
 	"encoding/pem"
 	"fmt"
 	"io"
@@ -68,19 +66,8 @@ func generateCertificate() (*x509certificate, error) {
 	}, nil
 }
 func main() {
-	cert, err := generateCertificate()
-	if err != nil {
-		log.Fatalf("forwarder: error occurred %v", err)
-	}
-	tlsCertificate, err := tls.X509KeyPair(cert.certificate, cert.priv)
-	if err != nil {
-		log.Fatalf("forwarder: error occurred %v", err)
-	}
 	var lr net.Listener
-	lr, err = tls.Listen("tcp", ":3389", &tls.Config{
-		InsecureSkipVerify: true,
-		Certificates:       []tls.Certificate{tlsCertificate},
-	})
+	lr, err := net.Listen("tcp", ":3389")
 	if err != nil {
 		log.Fatalf("forwarder: error occurred %v", err)
 	}
@@ -109,6 +96,34 @@ func main() {
 			continue
 		}
 
+	loop:
+		for {
+			msg, err := fc.Reverse.ReadGuacamoleMessage()
+			if err != nil {
+				log.Printf("error occurred %v", err)
+				_ = srcConn.Close()
+				_ = guacdConn.Close()
+				break loop
+			}
+
+			if msg.OpCode == "connect" {
+				log.Printf("%#v", msg)
+				log.Println("received connect message from client")
+				break loop
+			}
+
+			if msg.OpCode == "select" {
+				if err := fc.Reverse.WriteGuacamoleMessage(guacd.GuacamoleMessage{
+					OpCode: "args",
+					Args:   []string{"VERSION_1_5_0", "hostname", "port", "username", "password"},
+				}); err != nil {
+					_ = srcConn.Close()
+					_ = guacdConn.Close()
+					break loop
+				}
+			}
+		}
+
 		if err := fc.Forward.WriteGuacamoleMessage(
 			guacd.GuacamoleMessage{
 				OpCode: "select",
@@ -130,7 +145,7 @@ func main() {
 
 		if err := fc.Forward.WriteGuacamoleMessage(guacd.GuacamoleMessage{
 			OpCode: "size",
-			Args:   []string{"1024", "768", "96"},
+			Args:   []string{"3360", "1706", "192"},
 		}); err != nil {
 			log.Printf("error occurred %v", err)
 			_ = srcConn.Close()
@@ -140,7 +155,7 @@ func main() {
 
 		if err := fc.Forward.WriteGuacamoleMessage(guacd.GuacamoleMessage{
 			OpCode: "audio",
-			Args:   []string{"audio/ogg"},
+			Args:   []string{"audio/L8", "audio/L16"},
 		}); err != nil {
 			log.Printf("error occurred %v", err)
 			_ = srcConn.Close()
@@ -150,7 +165,7 @@ func main() {
 
 		if err := fc.Forward.WriteGuacamoleMessage(guacd.GuacamoleMessage{
 			OpCode: "video",
-			Args:   []string{},
+			Args:   nil,
 		}); err != nil {
 			log.Printf("error occurred %v", err)
 			_ = srcConn.Close()
@@ -160,7 +175,7 @@ func main() {
 
 		if err := fc.Forward.WriteGuacamoleMessage(guacd.GuacamoleMessage{
 			OpCode: "image",
-			Args:   []string{"image/png", "image/jpeg"},
+			Args:   []string{"image/png", "image/jpeg", "image/webp"},
 		}); err != nil {
 			log.Printf("error occurred %v", err)
 			_ = srcConn.Close()
@@ -178,6 +193,16 @@ func main() {
 			continue
 		}
 
+		if err := fc.Forward.WriteGuacamoleMessage(guacd.GuacamoleMessage{
+			OpCode: "name",
+			Args:   []string{"guacadmin"},
+		}); err != nil {
+			log.Printf("error occurred %v", err)
+			_ = srcConn.Close()
+			_ = guacdConn.Close()
+			continue
+		}
+
 		connArgs := make([]string, 0)
 		for _, arg := range msg.Args {
 			switch arg {
@@ -187,56 +212,10 @@ func main() {
 				connArgs = append(connArgs, strings.Split(os.Getenv("TARGET_ADDR"), ":")[0])
 			case "port":
 				connArgs = append(connArgs, strings.Split(os.Getenv("TARGET_ADDR"), ":")[1])
-			case "username":
-				connArgs = append(connArgs, "guest")
 			case "password":
 				connArgs = append(connArgs, "guest")
-			case "swap-red-blue":
-				connArgs = append(connArgs, "false")
-			case "read-only":
-				connArgs = append(connArgs, "false")
-			case "color-depth":
-				connArgs = append(connArgs, "0")
-			case "force-lossless":
-				connArgs = append(connArgs, "true")
-			case "dest-port":
-				connArgs = append(connArgs, "0")
-			case "autoretry":
-				connArgs = append(connArgs, "0")
-			case "reverse-connect":
-				connArgs = append(connArgs, "true")
-			case "listen-timeout":
-				connArgs = append(connArgs, "5000")
-			case "enable-audio":
-				connArgs = append(connArgs, "true")
-			case "enable-sftp":
-				connArgs = append(connArgs, "true")
-			case "sftp-server-alive-interval":
-				connArgs = append(connArgs, "0")
-			case "sftp-disable-download":
-				connArgs = append(connArgs, "false")
-			case "sftp-disable-upload":
-				connArgs = append(connArgs, "false")
-			case "recording-exclude-output":
-				connArgs = append(connArgs, "false")
-			case "recording-exclude-mouse":
-				connArgs = append(connArgs, "false")
-			case "recording-include-keys":
-				connArgs = append(connArgs, "false")
-			case "create-recording-path":
-				connArgs = append(connArgs, "false")
-			case "disable-copy":
-				connArgs = append(connArgs, "false")
-			case "disable-paste":
-				connArgs = append(connArgs, "false")
-			case "wol-send-packet":
-				connArgs = append(connArgs, "false")
-			case "encodings":
-				connArgs = append(connArgs, "ISO8859-1")
-			case "clipboard-encoding":
-				connArgs = append(connArgs, "ISO8859-1")
 			default:
-				connArgs = append(connArgs, fmt.Sprintf("%v.", 0))
+				connArgs = append(connArgs, "")
 			}
 		}
 
@@ -257,10 +236,22 @@ func main() {
 			_ = guacdConn.Close()
 			continue
 		}
+
+		if msg.OpCode == "ready" {
+			if err := fc.Reverse.WriteGuacamoleMessage(msg); err != nil {
+				log.Printf("error occurred %v", err)
+				_ = srcConn.Close()
+				_ = guacdConn.Close()
+			}
+		}
+
+		go func() {
+			_ = serve(fc.Forward.GetRawConn(), fc.Reverse.GetRawConn())
+		}()
 	}
 }
 
-func serve(srcConn, targetConn net.Conn) {
+func serve(srcConn, targetConn net.Conn) error {
 	defer func() {
 		_ = srcConn.Close()
 		_ = targetConn.Close()
@@ -271,15 +262,15 @@ func serve(srcConn, targetConn net.Conn) {
 	}
 	if err := os.MkdirAll(os.Getenv("STORAGE_LOCATION"), 0777); err != nil {
 		log.Printf("%v", err)
-		return
+		return err
 	}
 	storage, err := os.Create(fmt.Sprintf("%v/%v", os.Getenv("STORAGE_LOCATION"), sr.sessionID))
 	if err != nil {
-		return
+		return err
 	}
 	sr.storage = storage
 
-	handleConnection(srcConn, targetConn, sr)
+	return handleConnection(srcConn, targetConn, sr)
 }
 
 func handleConnection(srcConn, targetConn net.Conn, sr *SessionRecorder) (err error) {
@@ -322,7 +313,6 @@ type SessionRecorder struct {
 }
 
 func (sr *SessionRecorder) Write(b []byte) (n int, err error) {
-	log.Printf("%v", hex.Dump(b))
 	return sr.storage.Write(b)
 }
 

@@ -1,0 +1,75 @@
+video-convertor-guacamole-client-1  | 20:39:21.643 [http-nio-8080-exec-8] INFO  o.a.g.r.auth.AuthenticationService - User "guacadmin" successfully authenticated from 192.168.192.1.
+video-convertor-rdp-forwarder-1     | => /root/go/src/github.com/sklrsn/video-convertor/connection-forwarder/forwarder.go:382: writing 6.select,3.vnc;
+video-convertor-guacd-1             | guacd[1]: INFO:	Creating new client for protocol "vnc"
+video-convertor-guacd-1             | guacd[1]: INFO:	Connection ID is "$16e8d4ef-0ba4-43f1-b322-65808025e98b"
+video-convertor-rdp-forwarder-1     | => /root/go/src/github.com/sklrsn/video-convertor/connection-forwarder/forwarder.go:382: writing 4.args,13.VERSION_1_5_0,8.hostname,4.port,9.read-only,9.encodings,8.username,8.password,13.swap-red-blue,11.color-depth,6.cursor,9.autoretry,18.clipboard-encoding,9.dest-host,9.dest-port,12.enable-audio,16.audio-servername,15.reverse-connect,14.listen-timeout,11.enable-sftp,13.sftp-hostname,13.sftp-host-key,9.sftp-port,13.sftp-username,13.sftp-password,16.sftp-private-key,15.sftp-passphrase,14.sftp-directory,19.sftp-root-directory,26.sftp-server-alive-interval,21.sftp-disable-download,19.sftp-disable-upload,14.recording-path,14.recording-name,24.recording-exclude-output,23.recording-exclude-mouse,22.recording-include-keys,21.create-recording-path,12.disable-copy,13.disable-paste,15.wol-send-packet,12.wol-mac-addr,18.wol-broadcast-addr,12.wol-udp-port,13.wol-wait-time,14.force-lossless;
+video-convertor-rdp-forwarder-1     | => /root/go/src/github.com/sklrsn/video-convertor/connection-forwarder/forwarder.go:382: writing 4.size,4.3360,4.1706,3.192;
+video-convertor-rdp-forwarder-1     | => /root/go/src/github.com/sklrsn/video-convertor/connection-forwarder/forwarder.go:382: writing 5.audio,8.audio/L8,9.audio/L16;5.video;5.image,10.image/jpeg,9.image/png,10.image/webp;
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Processing instruction: size
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Processing instruction: audio
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Processing instruction: video
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Processing instruction: image
+video-convertor-rdp-forwarder-1     | => /root/go/src/github.com/sklrsn/video-convertor/connection-forwarder/forwarder.go:382: writing 8.timezone,15.Europe/Helsinki;
+video-convertor-rdp-forwarder-1     | => /root/go/src/github.com/sklrsn/video-convertor/connection-forwarder/forwarder.go:382: writing 4.name,9.guacadmin;
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Processing instruction: timezone
+video-convertor-rdp-forwarder-1     | => /root/go/src/github.com/sklrsn/video-convertor/connection-forwarder/forwarder.go:382: writing 7.connect,13.VERSION_1_5_0,10.vnc-server,4.5901,0.,0.,0.,5.guest,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.;
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Processing instruction: name
+video-convertor-guacd-1             | guacd[10]: INFO:	Cursor rendering: local
+video-convertor-rdp-forwarder-1     | => /root/go/src/github.com/sklrsn/video-convertor/connection-forwarder/forwarder.go:382: writing 5.ready,37.$16e8d4ef-0ba4-43f1-b322-65808025e98b;
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "swap-red-blue" omitted. Using default value of 0.
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "read-only" omitted. Using default value of 0.
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "color-depth" omitted. Using default value of 0.
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "force-lossless" omitted. Using default value of 0.
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "dest-port" omitted. Using default value of 0.
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "encodings" omitted. Using default value of "zrle ultra copyrect hextile zlib corre rre raw".
+video-convertor-guacd-1             | 
+video-convertor-guacd-1             | 
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "autoretry" omitted. Using default value of 0.
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "reverse-connect" omitted. Using default value of 0.
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "listen-timeout" omitted. Using default value of 5000.
+video-convertor-guacd-1             | 
+video-convertor-guacd-1             | 
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "enable-audio" omitted. Using default value of 0.
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "enable-sftp" omitted. Using default value of 0.
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "sftp-hostname" omitted. Using default value of "vnc-server".
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "sftp-port" omitted. Using default value of "22".
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "sftp-username" omitted. Using default value of "".
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "sftp-password" omitted. Using default value of "".
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "sftp-passphrase" omitted. Using default value of "".
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "sftp-root-directory" omitted. Using default value of "/".
+video-convertor-guacd-1             | 
+video-convertor-guacd-1             | 
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "sftp-server-alive-interval" omitted. Using default value of 0.
+video-convertor-guacd-1             | 
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "sftp-disable-download" omitted. Using default value of 0.
+video-convertor-guacd-1             | 
+video-convertor-guacd-1             | 
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "sftp-disable-upload" omitted. Using default value of 0.
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "recording-name" omitted. Using default value of "recording".
+video-convertor-guacd-1             | 
+video-convertor-guacd-1             | 
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "recording-exclude-output" omitted. Using default value of 0.
+video-convertor-guacd-1             | 
+video-convertor-guacd-1             | 
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "recording-exclude-mouse" omitted. Using default value of 0.
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "recording-include-keys" omitted. Using default value of 0.
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "create-recording-path" omitted. Using default value of 0.
+video-convertor-guacd-1             | 
+video-convertor-guacd-1             | 
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "disable-copy" omitted. Using default value of 0.
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "disable-paste" omitted. Using default value of 0.
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Parameter "wol-send-packet" omitted. Using default value of 0.
+video-convertor-guacd-1             | guacd[10]: INFO:	User "@98df496c-929c-4b12-ac34-d62e642b5bcf" joined connection "$16e8d4ef-0ba4-43f1-b322-65808025e98b" (1 users now present)
+video-convertor-guacd-1             | 
+video-convertor-guacd-1             | 
+video-convertor-guacd-1             | guacd[10]: DEBUG:	Client is using protocol version "VERSION_1_5_0"
+video-convertor-guacamole-client-1  | 20:39:22.845 [http-nio-8080-exec-6] INFO  o.a.g.tunnel.TunnelRequestService - User "guacadmin" connected to connection "vnc-server".
+video-convertor-rdp-forwarder-1     | => /root/go/src/github.com/sklrsn/video-convertor/connection-forwarder/forwarder.go:382: writing 4.size,1.0,4.1280,4.1024;4.size,2.-1,2.11,2.16;3.img,1.1,2.12,2.-1,9.image/png,1.0,1.0;4.blob,1.1,232.iVBORw0KGgoAAAANSUhEUgAAAAsAAAAQCAYAAADAvYV+AAAABmJLR0QA/wD/AP+gvaeTAAAAYklEQVQokY2RQQ4AIQgDW+L/v9y9qCEsIJ4QZggoJAnDYwAwFQwASI4EO8FEMH95CRYTnfCDOyGFK6GEM6GFo7AqKI4sSSsCJH1X+roFkKdjueABX/On77lz2uGtr6pj9okfTeJQAYVaxnMAAAAASUVORK5CYII=;3.end,1.1;6.cursor,1.0,1.0,2.-1,1.0,1.0,2.11,2.16;
+video-convertor-guacd-1             | guacd[10]: TRACE:	Server completed frame 6384438ms.
+video-convertor-rdp-forwarder-1     | => /root/go/src/github.com/sklrsn/video-convertor/connection-forwarder/forwarder.go:382: writing 4.sync,7.6384438;
+video-convertor-rdp-forwarder-1     | => /root/go/src/github.com/sklrsn/video-convertor/connection-forwarder/forwarder.go:382: writing 3.ack,1.1,2.OK,1.0;
+video-convertor-rdp-forwarder-1     | => /root/go/src/github.com/sklrsn/video-convertor/connection-forwarder/forwarder.go:382: writing 5.audio,1.0,31.audio/L16;rate=44100,channels=2;
+video-convertor-rdp-forwarder-1     | => /root/go/src/github.com/sklrsn/video-convertor/connection-forwarder/forwarder.go:382: writing 4.sync,7.6384438;
+video-convertor-rdp-forwarder-1     | => /root/go/src/github.com/sklrsn/video-convertor/connection-forwarder/forwarder.go:382: writing 9.clipboard,1.1,10.text/plain;
+video-convertor-guacd-1             | guacd[10]: TRACE:	User confirmation of frame 6384438ms received at 6384755ms (processing_lag=0ms)
+video-convertor-rdp-forwarder-1     | => /root/go/src/github.com/sklrsn/video-convertor/connection-forwarder/forwarder.go:382: writing 3.end,1.1;
