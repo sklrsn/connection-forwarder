@@ -82,9 +82,12 @@ func (gc *GuacamoleConnection) SerializeGuacamoleMessage(gm GuacamoleMessage) (s
 		for _, arg := range gm.Args {
 			args = append(args, fmt.Sprintf("%v.%v", len(arg), arg))
 		}
-		if _, err := wireMessage.WriteString(strings.Join(args, ",")); err != nil {
-			return "", err
-		}
+	} else {
+		args = append(args, fmt.Sprintf("%v.", 0))
+	}
+
+	if _, err := wireMessage.WriteString(strings.Join(args, ",")); err != nil {
+		return "", err
 	}
 
 	if _, err := wireMessage.WriteString(";"); err != nil {

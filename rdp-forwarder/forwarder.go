@@ -179,7 +179,7 @@ func main() {
 		}
 
 		if err := fc.Forward.WriteGuacamoleMessage(guacd.GuacamoleMessage{
-			OpCode: "timezone",
+			OpCode: "connect",
 			Args:   []string{"Europe/Helsinki"},
 		}); err != nil {
 			log.Printf("error occurred %v", err)
