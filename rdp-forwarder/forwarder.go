@@ -250,6 +250,31 @@ func main() {
 			continue
 		}
 
+		msg, err = fc.Forward.ReadGuacamoleMessage()
+		if err != nil {
+			log.Printf("error occurred %v", err)
+			_ = srcConn.Close()
+			_ = guacdConn.Close()
+			continue
+		}
+
+		if err := fc.Forward.WriteGuacamoleMessage(guacd.GuacamoleMessage{
+			OpCode: "select",
+			Args:   msg.Args,
+		}); err != nil {
+			log.Printf("error occurred %v", err)
+			_ = srcConn.Close()
+			_ = guacdConn.Close()
+			continue
+		}
+
+		msg, err = fc.Forward.ReadGuacamoleMessage()
+		if err != nil {
+			log.Printf("error occurred %v", err)
+			_ = srcConn.Close()
+			_ = guacdConn.Close()
+			continue
+		}
 	}
 }
 
