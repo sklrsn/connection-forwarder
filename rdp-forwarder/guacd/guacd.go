@@ -3,7 +3,6 @@ package guacd
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"net"
 	"strings"
 	"sync"
@@ -20,7 +19,7 @@ type ForwarderConnection struct {
 	condn sync.Cond
 }
 
-func NewForwarderConnection(srcConn, guacdConn net.Conn, targetAddr string) (*ForwarderConnection, error) {
+func NewForwarderConnection(srcConn, guacdConn net.Conn) (*ForwarderConnection, error) {
 	return &ForwarderConnection{
 		Reverse: &GuacamoleConnection{
 			conn: srcConn,
@@ -29,7 +28,6 @@ func NewForwarderConnection(srcConn, guacdConn net.Conn, targetAddr string) (*Fo
 			conn: guacdConn,
 			br:   bufio.NewReader(guacdConn),
 		},
-		targetAddr: targetAddr,
 	}, nil
 }
 
@@ -52,7 +50,6 @@ func (gc *GuacamoleConnection) WriteGuacamoleMessage(gcm GuacamoleMessage) error
 		return err
 	}
 
-	log.Printf(string(msg))
 	if _, err := gc.writeBytes([]byte(msg)); err != nil {
 		return err
 	}

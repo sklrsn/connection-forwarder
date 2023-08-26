@@ -16,6 +16,7 @@ import (
 	mrand "math/rand"
 	"net"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -100,7 +101,7 @@ func main() {
 			continue
 		}
 
-		fc, err := guacd.NewForwarderConnection(srcConn, guacdConn, os.Getenv("TARGET_ADDR"))
+		fc, err := guacd.NewForwarderConnection(srcConn, guacdConn)
 		if err != nil {
 			log.Printf("error occurred %v", err)
 			_ = srcConn.Close()
@@ -178,9 +179,27 @@ func main() {
 			continue
 		}
 
+		connArgs := make([]string, 0)
+		for _, arg := range msg.Args {
+			switch arg {
+			case "VERSION_1_5_0", "VERSION_1_3_0", "VERSION_1_1_0", "VERSION_1_0_0":
+				connArgs = append(connArgs, arg)
+			case "hostname":
+				connArgs = append(connArgs, strings.Split(os.Getenv("TARGET_ADDR"), ":")[0])
+			case "port":
+				connArgs = append(connArgs, strings.Split(os.Getenv("TARGET_ADDR"), ":")[1])
+			case "username":
+				connArgs = append(connArgs, "guest")
+			case "password":
+				connArgs = append(connArgs, "guest")
+			default:
+				connArgs = append(connArgs, fmt.Sprintf("%v.", 0))
+			}
+		}
+
 		if err := fc.Forward.WriteGuacamoleMessage(guacd.GuacamoleMessage{
 			OpCode: "connect",
-			Args:   []string{"Europe/Helsinki"},
+			Args:   connArgs,
 		}); err != nil {
 			log.Printf("error occurred %v", err)
 			_ = srcConn.Close()
