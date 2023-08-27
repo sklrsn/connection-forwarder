@@ -6,6 +6,7 @@ all: down up
 setup:
 	mkdir -p storage/
 	mkdir -p downloads/
+	mkdir -p recordings/
 
 .PHONY: up
 up: setup
@@ -19,3 +20,4 @@ down:
 clean:
 	rm -rf storage/
 	rm -rf downloads/
+	rm -rf recordings/

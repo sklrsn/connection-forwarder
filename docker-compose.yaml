@@ -53,6 +53,8 @@ services:
       - "4822:4822"
     environment:
       - GUACD_LOG_LEVEL=trace
+    volumes:
+      - ./recordings:/opt/recordings
 
   guacamole-client:
     image: guacamole/guacamole:1.5.3

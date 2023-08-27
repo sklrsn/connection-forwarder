@@ -214,6 +214,12 @@ func main() {
 				connArgs = append(connArgs, strings.Split(os.Getenv("TARGET_ADDR"), ":")[1])
 			case "password":
 				connArgs = append(connArgs, "guest")
+			case "recording-path":
+				connArgs = append(connArgs, "/opt/recordings")
+			case "create-recording-path":
+				connArgs = append(connArgs, "true")
+			case "recording-name":
+				connArgs = append(connArgs, fmt.Sprintf("%v.m4v", uuid.NewString()))
 			default:
 				connArgs = append(connArgs, "")
 			}
