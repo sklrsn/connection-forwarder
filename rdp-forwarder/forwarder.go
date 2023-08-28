@@ -219,7 +219,7 @@ func main() {
 			case "create-recording-path":
 				connArgs = append(connArgs, "true")
 			case "recording-name":
-				connArgs = append(connArgs, fmt.Sprintf("%v.m4v", uuid.NewString()))
+				connArgs = append(connArgs, fmt.Sprintf("%v", uuid.NewString()))
 			default:
 				connArgs = append(connArgs, "")
 			}
