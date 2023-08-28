@@ -19,7 +19,7 @@ func main() {
 	log.Println("starting exporter at 9900")
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/storage", http.StatusMovedPermanently)
+		http.Redirect(w, r, "/recordings", http.StatusMovedPermanently)
 	})
 
 	http.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
